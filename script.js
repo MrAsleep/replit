@@ -1,48 +1,52 @@
-// Niz u koji cuvamo sve pacijente
-var pacijenti = [];
+// Niz u koji cuvamo sve vezbace
+var vezbaci = [];
 
 // Uzimamo elemente iz HTML-a
-var btnDodajPacijenta = document.getElementById("btnDodajPacijenta");
-var btnPrikaziPacijente = document.getElementById("btnPrikaziPacijente");
+var btnDodajVezbaca = document.getElementById("btnDodajVezbaca");
+var btnPrikaziVezbace = document.getElementById("btnPrikaziVezbace");
 var btnPrimeni = document.getElementById("btnPrimeni");
 
 var formaSekcija = document.getElementById("formaSekcija");
-var pacijentiSekcija = document.getElementById("pacijentiSekcija");
+var vezbaciSekcija = document.getElementById("vezbaciSekcija");
 
-var patientForm = document.getElementById("patientForm");
+var vezbacForm = document.getElementById("vezbacForm");
 
 var imeInput = document.getElementById("ime");
 var godineInput = document.getElementById("godine");
 var visinaInput = document.getElementById("visina");
 var tezinaInput = document.getElementById("tezina");
+var ciljInput = document.getElementById("cilj");
+var clanarinaInput = document.getElementById("clanarina");
 var napomenaInput = document.getElementById("napomena");
 
 var filterKategorija = document.getElementById("filterKategorija");
 var sortiranje = document.getElementById("sortiranje");
 
-var patientsContainer = document.getElementById("patientsContainer");
-var brojPacijenata = document.getElementById("brojPacijenata");
+var vezbaciContainer = document.getElementById("vezbaciContainer");
+var brojVezbaca = document.getElementById("brojVezbaca");
 
 // Povezivanje dugmica sa funkcijama
-btnDodajPacijenta.addEventListener("click", prikaziFormu);
-btnPrikaziPacijente.addEventListener("click", prikaziPacijente);
-btnPrimeni.addEventListener("click", prikaziPacijente);
-patientForm.addEventListener("submit", dodajPacijenta);
+btnDodajVezbaca.addEventListener("click", prikaziFormu);
+btnPrikaziVezbace.addEventListener("click", prikaziVezbace);
+btnPrimeni.addEventListener("click", prikaziVezbace);
+vezbacForm.addEventListener("submit", dodajVezbaca);
 
 // Prikaz forme
 function prikaziFormu() {
   formaSekcija.classList.remove("d-none");
-  pacijentiSekcija.classList.add("d-none");
+  vezbaciSekcija.classList.add("d-none");
 }
 
-// Dodavanje pacijenta
-function dodajPacijenta(e) {
+// Dodavanje vezbaca
+function dodajVezbaca(e) {
   e.preventDefault();
 
   var ime = imeInput.value.trim();
   var godine = parseInt(godineInput.value);
   var visina = parseFloat(visinaInput.value);
   var tezina = parseFloat(tezinaInput.value);
+  var cilj = ciljInput.value;
+  var clanarina = clanarinaInput.value;
   var napomena = napomenaInput.value.trim();
 
   var polRadio = document.querySelector('input[name="pol"]:checked');
@@ -71,8 +75,8 @@ function dodajPacijenta(e) {
   var bmi = izracunajBMI(visina, tezina);
   var kategorija = odrediKategorijuBMI(bmi);
 
-  // Pravljenje objekta pacijenta
-  var pacijent = {
+  // Pravljenje objekta vezbaca
+  var vezbac = {
     id: new Date().getTime(),
     ime: ime,
     godine: godine,
@@ -81,20 +85,22 @@ function dodajPacijenta(e) {
     tezina: tezina,
     bmi: bmi,
     kategorija: kategorija,
+    cilj: cilj,
+    clanarina: clanarina,
     napomena: napomena,
   };
 
   // Dodavanje objekta u niz
-  pacijenti.push(pacijent);
+  vezbaci.push(vezbac);
 
   // Reset forme
-  patientForm.reset();
+  vezbacForm.reset();
   document.getElementById("muski").checked = true;
 
-  alert("Pacijent je dodat.");
+  alert("Vežbač je dodat.");
 
-  // Posle dodavanja prikazujemo pacijente
-  prikaziPacijente();
+  // Posle dodavanja prikazujemo vezbace
+  prikaziVezbace();
 }
 
 // Racunanje BMI
@@ -115,20 +121,30 @@ function odrediKategorijuBMI(bmi) {
   }
 }
 
-// Prikaz pacijenata
-function prikaziPacijente() {
-  // Sakrij formu, prikazi sekciju pacijenata
+// Ikonica za cilj treninga
+function ikonicaZaCilj(cilj) {
+  if (cilj == "Mršavljenje") return "🔥";
+  if (cilj == "Izgradnja mišića") return "💪";
+  if (cilj == "Održavanje forme") return "⚖️";
+  if (cilj == "Povećanje snage") return "🏆";
+  if (cilj == "Kardio kondicija") return "🏃";
+  return "🎯";
+}
+
+// Prikaz vezbaca
+function prikaziVezbace() {
+  // Sakrij formu, prikazi sekciju vezbaca
   formaSekcija.classList.add("d-none");
-  pacijentiSekcija.classList.remove("d-none");
+  vezbaciSekcija.classList.remove("d-none");
 
   // Praznimo prethodni prikaz
-  patientsContainer.innerHTML = "";
+  vezbaciContainer.innerHTML = "";
 
   // Pravimo pomocni niz
   var listaZaPrikaz = [];
 
-  for (var i = 0; i < pacijenti.length; i++) {
-    listaZaPrikaz.push(pacijenti[i]);
+  for (var i = 0; i < vezbaci.length; i++) {
+    listaZaPrikaz.push(vezbaci[i]);
   }
 
   // Filtriranje po kategoriji
@@ -161,16 +177,18 @@ function prikaziPacijente() {
     });
   }
 
-  // Broj pacijenata
-  brojPacijenata.textContent = listaZaPrikaz.length + " pacijenata";
+  // Broj vezbaca
+  var tekst = listaZaPrikaz.length == 1 ? " vežbač" : " vežbača";
+  brojVezbaca.textContent = listaZaPrikaz.length + tekst;
 
-  // Ako nema pacijenata
+  // Ako nema vezbaca
   if (listaZaPrikaz.length == 0) {
-    patientsContainer.innerHTML =
+    vezbaciContainer.innerHTML =
       '<div class="col-12">' +
       '<div class="empty-box p-5 text-center">' +
-      '<h4 class="mb-2">Nema pacijenata za prikaz</h4>' +
-      '<p class="text-muted mb-0">Dodaj pacijenta ili promeni filter.</p>' +
+      '<div style="font-size:3rem">🏋️</div>' +
+      '<h4 class="mb-2 mt-2">Nema vežbača za prikaz</h4>' +
+      '<p class="text-muted mb-0">Dodaj vežbača ili promeni filter.</p>' +
       "</div>" +
       "</div>";
     return;
@@ -178,17 +196,17 @@ function prikaziPacijente() {
 
   // Pravljenje kartica
   for (var i = 0; i < listaZaPrikaz.length; i++) {
-    var pacijent = listaZaPrikaz[i];
+    var vezbac = listaZaPrikaz[i];
     var linija = "";
     var badge = "";
 
-    if (pacijent.kategorija == "Pothranjenost") {
+    if (vezbac.kategorija == "Pothranjenost") {
       linija = "line-pothranjenost";
       badge = "text-bg-info";
-    } else if (pacijent.kategorija == "Normalna težina") {
+    } else if (vezbac.kategorija == "Normalna težina") {
       linija = "line-normalna";
       badge = "text-bg-success";
-    } else if (pacijent.kategorija == "Prekomerna težina") {
+    } else if (vezbac.kategorija == "Prekomerna težina") {
       linija = "line-prekomerna";
       badge = "text-bg-warning";
     } else {
@@ -198,40 +216,48 @@ function prikaziPacijente() {
 
     var napomenaTekst = "Nema napomene.";
 
-    if (pacijent.napomena != "") {
-      napomenaTekst = pacijent.napomena;
+    if (vezbac.napomena != "") {
+      napomenaTekst = vezbac.napomena;
     }
 
-    patientsContainer.innerHTML +=
+    vezbaciContainer.innerHTML +=
       '<div class="col-12 col-md-6 col-xl-4">' +
-      '<div class="card patient-card">' +
+      '<div class="card vezbac-card">' +
       '<div class="card-top-line ' +
       linija +
       '"></div>' +
       '<div class="card-body p-4">' +
       '<h4 class="card-title mb-3">' +
-      pacijent.ime +
+      vezbac.ime +
       "</h4>" +
       '<div class="info-line"><strong>Godine:</strong> ' +
-      pacijent.godine +
+      vezbac.godine +
       "</div>" +
       '<div class="info-line"><strong>Pol:</strong> ' +
-      pacijent.pol +
+      vezbac.pol +
       "</div>" +
       '<div class="info-line"><strong>Visina:</strong> ' +
-      pacijent.visina +
+      vezbac.visina +
       " m</div>" +
       '<div class="info-line"><strong>Težina:</strong> ' +
-      pacijent.tezina +
+      vezbac.tezina +
       " kg</div>" +
       '<div class="info-line"><strong>BMI:</strong> ' +
-      pacijent.bmi.toFixed(2) +
+      vezbac.bmi.toFixed(2) +
       "</div>" +
-      '<div class="info-line"><strong>Kategorija:</strong> <span class="badge ' +
+      '<div class="info-line"><strong>BMI kategorija:</strong> <span class="badge ' +
       badge +
       '">' +
-      pacijent.kategorija +
+      vezbac.kategorija +
       "</span></div>" +
+      '<div class="info-line"><strong>Cilj:</strong> ' +
+      ikonicaZaCilj(vezbac.cilj) +
+      " " +
+      vezbac.cilj +
+      "</div>" +
+      '<div class="info-line"><strong>Članarina:</strong> ' +
+      vezbac.clanarina +
+      "</div>" +
       '<div class="mt-3"><strong>Napomena:</strong><p class="text-muted mb-0">' +
       napomenaTekst +
       "</p></div>" +

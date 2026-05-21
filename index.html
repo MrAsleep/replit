@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>BMI kalkulator pacijenata</title>
+    <title>Evidencija vežbača - Teretana</title>
 
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
@@ -16,9 +16,10 @@
     <div class="container py-5">
       <div class="app-box p-4 p-md-5">
         <div class="text-center mb-4">
-          <h1 class="main-title">BMI kalkulator pacijenata</h1>
+          <div class="gym-icon mb-2">🏋️</div>
+          <h1 class="main-title">Evidencija vežbača</h1>
           <p class="text-muted mb-0">
-            Dodavanje pacijenata, BMI računanje, filtriranje i sortiranje
+            Dodavanje vežbača, BMI računanje, filtriranje i sortiranje
           </p>
         </div>
 
@@ -26,19 +27,19 @@
           class="d-flex flex-column flex-md-row gap-3 justify-content-center mb-4"
         >
           <button
-            id="btnDodajPacijenta"
+            id="btnDodajVezbaca"
             class="btn btn-primary btn-lg px-4"
             type="button"
           >
-            Dodaj pacijenta
+            Dodaj vežbača
           </button>
 
           <button
-            id="btnPrikaziPacijente"
+            id="btnPrikaziVezbace"
             class="btn btn-outline-dark btn-lg px-4"
             type="button"
           >
-            Prikaži pacijente
+            Prikaži vežbače
           </button>
         </div>
 
@@ -46,9 +47,9 @@
         <section id="formaSekcija">
           <div class="card border-0 shadow-sm rounded-4">
             <div class="card-body p-4">
-              <h3 class="mb-4">Unos pacijenta</h3>
+              <h3 class="mb-4">Unos vežbača</h3>
 
-              <form id="patientForm" class="row g-3">
+              <form id="vezbacForm" class="row g-3">
                 <div class="col-12 col-md-6">
                   <label for="ime" class="form-label">Ime i prezime</label>
                   <input
@@ -114,23 +115,44 @@
                     step="0.1"
                     id="tezina"
                     class="form-control"
-                    placeholder="Npr. 72"
+                    placeholder="Npr. 80"
                   />
                 </div>
 
+                <div class="col-12 col-md-6">
+                  <label for="cilj" class="form-label">Cilj treninga</label>
+                  <select id="cilj" class="form-select">
+                    <option value="Mršavljenje">Mršavljenje</option>
+                    <option value="Izgradnja mišića">Izgradnja mišića</option>
+                    <option value="Održavanje forme">Održavanje forme</option>
+                    <option value="Povećanje snage">Povećanje snage</option>
+                    <option value="Kardio kondicija">Kardio kondicija</option>
+                  </select>
+                </div>
+
+                <div class="col-12 col-md-6">
+                  <label for="clanarina" class="form-label">Tip članarine</label>
+                  <select id="clanarina" class="form-select">
+                    <option value="Mesečna">Mesečna</option>
+                    <option value="Tromesečna">Tromesečna</option>
+                    <option value="Godišnja">Godišnja</option>
+                    <option value="Jednokratna">Jednokratna (po treningu)</option>
+                  </select>
+                </div>
+
                 <div class="col-12">
-                  <label for="napomena" class="form-label">Napomena</label>
+                  <label for="napomena" class="form-label">Napomena / Trening plan</label>
                   <textarea
                     id="napomena"
                     class="form-control"
                     rows="3"
-                    placeholder="Dodatna napomena"
+                    placeholder="Npr. trening 3x nedeljno, poseban program..."
                   ></textarea>
                 </div>
 
                 <div class="col-12 d-flex flex-column flex-sm-row gap-2">
                   <button type="submit" class="btn btn-success px-4">
-                    Sačuvaj pacijenta
+                    Sačuvaj vežbača
                   </button>
                   <button type="reset" class="btn btn-secondary px-4">
                     Reset
@@ -141,14 +163,14 @@
           </div>
         </section>
 
-        <!-- PACIJENTI -->
-        <section id="pacijentiSekcija" class="d-none mt-4">
+        <!-- VEZBACI -->
+        <section id="vezbaciSekcija" class="d-none mt-4">
           <div class="card border-0 shadow-sm rounded-4 mb-4">
             <div class="card-body p-4">
               <div class="row g-3 align-items-end">
                 <div class="col-12 col-md-4">
                   <label for="filterKategorija" class="form-label"
-                    >Filtriraj po kategoriji</label
+                    >Filtriraj po BMI kategoriji</label
                   >
                   <select id="filterKategorija" class="form-select">
                     <option value="Sve">Sve</option>
@@ -186,13 +208,13 @@
           <div
             class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3"
           >
-            <h3 class="mb-0">Lista pacijenata</h3>
-            <span id="brojPacijenata" class="badge text-bg-primary fs-6"
-              >0 pacijenata</span
+            <h3 class="mb-0">Lista vežbača</h3>
+            <span id="brojVezbaca" class="badge text-bg-primary fs-6"
+              >0 vežbača</span
             >
           </div>
 
-          <div id="patientsContainer" class="row g-4"></div>
+          <div id="vezbaciContainer" class="row g-4"></div>
         </section>
       </div>
     </div>

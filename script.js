@@ -13,17 +13,19 @@ var vezbacForm = document.getElementById("vezbacForm");
 
 var imeInput = document.getElementById("ime");
 var godineInput = document.getElementById("godine");
-var visinaInput = document.getElementById("visina");
-var tezinaInput = document.getElementById("tezina");
 var ciljInput = document.getElementById("cilj");
 var clanarinaInput = document.getElementById("clanarina");
+var datumUplateInput = document.getElementById("datumUplate");
 var napomenaInput = document.getElementById("napomena");
 
-var filterKategorija = document.getElementById("filterKategorija");
+var filterStatus = document.getElementById("filterStatus");
 var sortiranje = document.getElementById("sortiranje");
 
 var vezbaciContainer = document.getElementById("vezbaciContainer");
 var brojVezbaca = document.getElementById("brojVezbaca");
+
+// Postavi danasnji datum kao default
+datumUplateInput.value = new Date().toISOString().split("T")[0];
 
 // Povezivanje dugmica sa funkcijama
 btnDodajVezbaca.addEventListener("click", prikaziFormu);
@@ -37,152 +39,142 @@ function prikaziFormu() {
   vezbaciSekcija.classList.add("d-none");
 }
 
+// Broj dana vazenja clanarine
+function danaClanarine(tip) {
+  if (tip === "Mesečna") return 30;
+  if (tip === "Tromesečna") return 90;
+  if (tip === "Godišnja") return 365;
+  if (tip === "Jednokratna") return 1;
+  return 30;
+}
+
+// Izracunaj status i dane do isteka
+function statusClanarine(datumUplate, tipClanarine) {
+  var danas = new Date();
+  danas.setHours(0, 0, 0, 0);
+  var uplata = new Date(datumUplate);
+  uplata.setHours(0, 0, 0, 0);
+  var dana = danaClanarine(tipClanarine);
+  var istice = new Date(uplata);
+  istice.setDate(istice.getDate() + dana);
+  var preostalo = Math.ceil((istice - danas) / (1000 * 60 * 60 * 24));
+
+  if (preostalo < 0) {
+    return { status: "Istekla", preostalo: preostalo, istice: istice };
+  } else if (preostalo <= 7) {
+    return { status: "Uskoro ističe", preostalo: preostalo, istice: istice };
+  } else {
+    return { status: "Aktivna", preostalo: preostalo, istice: istice };
+  }
+}
+
+// Formatiranje datuma
+function formatirajDatum(datum) {
+  var d = new Date(datum);
+  d.setHours(0, 0, 0, 0);
+  var dan = String(d.getDate()).padStart(2, "0");
+  var mesec = String(d.getMonth() + 1).padStart(2, "0");
+  var god = d.getFullYear();
+  return dan + "." + mesec + "." + god + ".";
+}
+
+// Ikonica za cilj treninga
+function ikonicaZaCilj(cilj) {
+  if (cilj === "Mršavljenje") return "🔥";
+  if (cilj === "Izgradnja mišića") return "💪";
+  if (cilj === "Održavanje forme") return "⚖️";
+  if (cilj === "Povećanje snage") return "🏆";
+  if (cilj === "Kardio kondicija") return "🏃";
+  return "🎯";
+}
+
 // Dodavanje vezbaca
 function dodajVezbaca(e) {
   e.preventDefault();
 
   var ime = imeInput.value.trim();
   var godine = parseInt(godineInput.value);
-  var visina = parseFloat(visinaInput.value);
-  var tezina = parseFloat(tezinaInput.value);
   var cilj = ciljInput.value;
   var clanarina = clanarinaInput.value;
+  var datumUplate = datumUplateInput.value;
   var napomena = napomenaInput.value.trim();
 
   var polRadio = document.querySelector('input[name="pol"]:checked');
-  var pol;
+  var pol = polRadio ? polRadio.value : "Nije definisano";
 
-  if (polRadio) {
-    pol = polRadio.value;
-  } else {
-    pol = "Nije definisano";
-  }
-
-  // Provera podataka
-  if (
-    ime == "" ||
-    isNaN(godine) ||
-    isNaN(visina) ||
-    isNaN(tezina) ||
-    visina <= 0 ||
-    tezina <= 0
-  ) {
+  if (ime === "" || isNaN(godine) || datumUplate === "") {
     alert("Unesi ispravne podatke.");
     return;
   }
 
-  // Racunanje BMI i kategorije
-  var bmi = izracunajBMI(visina, tezina);
-  var kategorija = odrediKategorijuBMI(bmi);
+  var info = statusClanarine(datumUplate, clanarina);
 
-  // Pravljenje objekta vezbaca
   var vezbac = {
     id: new Date().getTime(),
     ime: ime,
     godine: godine,
     pol: pol,
-    visina: visina,
-    tezina: tezina,
-    bmi: bmi,
-    kategorija: kategorija,
     cilj: cilj,
     clanarina: clanarina,
+    datumUplate: datumUplate,
+    status: info.status,
+    preostalo: info.preostalo,
+    istice: info.istice,
     napomena: napomena,
   };
 
-  // Dodavanje objekta u niz
   vezbaci.push(vezbac);
 
-  // Reset forme
   vezbacForm.reset();
   document.getElementById("muski").checked = true;
+  datumUplateInput.value = new Date().toISOString().split("T")[0];
 
   alert("Vežbač je dodat.");
-
-  // Posle dodavanja prikazujemo vezbace
   prikaziVezbace();
-}
-
-// Racunanje BMI
-function izracunajBMI(visina, tezina) {
-  return tezina / (visina * visina);
-}
-
-// Odredjivanje BMI kategorije
-function odrediKategorijuBMI(bmi) {
-  if (bmi < 18.5) {
-    return "Pothranjenost";
-  } else if (bmi < 25) {
-    return "Normalna težina";
-  } else if (bmi < 30) {
-    return "Prekomerna težina";
-  } else {
-    return "Gojaznost";
-  }
-}
-
-// Ikonica za cilj treninga
-function ikonicaZaCilj(cilj) {
-  if (cilj == "Mršavljenje") return "🔥";
-  if (cilj == "Izgradnja mišića") return "💪";
-  if (cilj == "Održavanje forme") return "⚖️";
-  if (cilj == "Povećanje snage") return "🏆";
-  if (cilj == "Kardio kondicija") return "🏃";
-  return "🎯";
 }
 
 // Prikaz vezbaca
 function prikaziVezbace() {
-  // Sakrij formu, prikazi sekciju vezbaca
   formaSekcija.classList.add("d-none");
   vezbaciSekcija.classList.remove("d-none");
-
-  // Praznimo prethodni prikaz
   vezbaciContainer.innerHTML = "";
 
-  // Pravimo pomocni niz
-  var listaZaPrikaz = [];
-
+  // Azuriraj statuse pre prikaza (datum se menja svaki dan)
   for (var i = 0; i < vezbaci.length; i++) {
-    listaZaPrikaz.push(vezbaci[i]);
+    var info = statusClanarine(vezbaci[i].datumUplate, vezbaci[i].clanarina);
+    vezbaci[i].status = info.status;
+    vezbaci[i].preostalo = info.preostalo;
+    vezbaci[i].istice = info.istice;
   }
 
-  // Filtriranje po kategoriji
-  var kategorijaFilter = filterKategorija.value;
+  var listaZaPrikaz = vezbaci.slice();
 
-  if (kategorijaFilter != "Sve") {
-    var filtrirani = [];
-
-    for (var i = 0; i < listaZaPrikaz.length; i++) {
-      if (listaZaPrikaz[i].kategorija == kategorijaFilter) {
-        filtrirani.push(listaZaPrikaz[i]);
-      }
-    }
-
-    listaZaPrikaz = filtrirani;
-  }
-
-  // Sortiranje po BMI
-  var nacinSortiranja = sortiranje.value;
-
-  if (nacinSortiranja == "min-max") {
-    listaZaPrikaz.sort(function (a, b) {
-      return a.bmi - b.bmi;
+  // Filtriranje po statusu
+  var statusFilter = filterStatus.value;
+  if (statusFilter !== "Sve") {
+    listaZaPrikaz = listaZaPrikaz.filter(function (v) {
+      return v.status === statusFilter;
     });
   }
 
-  if (nacinSortiranja == "max-min") {
+  // Sortiranje po datumu uplate
+  var nacinSortiranja = sortiranje.value;
+  if (nacinSortiranja === "najnoviji") {
     listaZaPrikaz.sort(function (a, b) {
-      return b.bmi - a.bmi;
+      return new Date(b.datumUplate) - new Date(a.datumUplate);
+    });
+  } else if (nacinSortiranja === "najstariji") {
+    listaZaPrikaz.sort(function (a, b) {
+      return new Date(a.datumUplate) - new Date(b.datumUplate);
     });
   }
 
   // Broj vezbaca
-  var tekst = listaZaPrikaz.length == 1 ? " vežbač" : " vežbača";
+  var tekst = listaZaPrikaz.length === 1 ? " vežbač" : " vežbača";
   brojVezbaca.textContent = listaZaPrikaz.length + tekst;
 
   // Ako nema vezbaca
-  if (listaZaPrikaz.length == 0) {
+  if (listaZaPrikaz.length === 0) {
     vezbaciContainer.innerHTML =
       '<div class="col-12">' +
       '<div class="empty-box p-5 text-center">' +
@@ -196,71 +188,44 @@ function prikaziVezbace() {
 
   // Pravljenje kartica
   for (var i = 0; i < listaZaPrikaz.length; i++) {
-    var vezbac = listaZaPrikaz[i];
+    var v = listaZaPrikaz[i];
     var linija = "";
     var badge = "";
+    var preostalaTekst = "";
 
-    if (vezbac.kategorija == "Pothranjenost") {
-      linija = "line-pothranjenost";
-      badge = "text-bg-info";
-    } else if (vezbac.kategorija == "Normalna težina") {
-      linija = "line-normalna";
+    if (v.status === "Aktivna") {
+      linija = "line-aktivna";
       badge = "text-bg-success";
-    } else if (vezbac.kategorija == "Prekomerna težina") {
-      linija = "line-prekomerna";
+      preostalaTekst = "Preostalo: " + v.preostalo + " dana";
+    } else if (v.status === "Uskoro ističe") {
+      linija = "line-uskoro";
       badge = "text-bg-warning";
+      preostalaTekst = "Ističe za: " + v.preostalo + " " + (v.preostalo === 1 ? "dan" : "dana");
     } else {
-      linija = "line-gojaznost";
+      linija = "line-istekla";
       badge = "text-bg-danger";
+      preostalaTekst = "Istekla pre " + Math.abs(v.preostalo) + " dana";
     }
 
-    var napomenaTekst = "Nema napomene.";
-
-    if (vezbac.napomena != "") {
-      napomenaTekst = vezbac.napomena;
-    }
+    var napomenaTekst = v.napomena !== "" ? v.napomena : "Nema napomene.";
 
     vezbaciContainer.innerHTML +=
       '<div class="col-12 col-md-6 col-xl-4">' +
       '<div class="card vezbac-card">' +
-      '<div class="card-top-line ' +
-      linija +
-      '"></div>' +
+      '<div class="card-top-line ' + linija + '"></div>' +
       '<div class="card-body p-4">' +
-      '<h4 class="card-title mb-3">' +
-      vezbac.ime +
-      "</h4>" +
-      '<div class="info-line"><strong>Godine:</strong> ' +
-      vezbac.godine +
+      '<div class="d-flex justify-content-between align-items-start mb-3">' +
+      '<h4 class="card-title mb-0">' + v.ime + "</h4>" +
+      '<span class="badge ' + badge + '">' + v.status + "</span>" +
       "</div>" +
-      '<div class="info-line"><strong>Pol:</strong> ' +
-      vezbac.pol +
-      "</div>" +
-      '<div class="info-line"><strong>Visina:</strong> ' +
-      vezbac.visina +
-      " m</div>" +
-      '<div class="info-line"><strong>Težina:</strong> ' +
-      vezbac.tezina +
-      " kg</div>" +
-      '<div class="info-line"><strong>BMI:</strong> ' +
-      vezbac.bmi.toFixed(2) +
-      "</div>" +
-      '<div class="info-line"><strong>BMI kategorija:</strong> <span class="badge ' +
-      badge +
-      '">' +
-      vezbac.kategorija +
-      "</span></div>" +
-      '<div class="info-line"><strong>Cilj:</strong> ' +
-      ikonicaZaCilj(vezbac.cilj) +
-      " " +
-      vezbac.cilj +
-      "</div>" +
-      '<div class="info-line"><strong>Članarina:</strong> ' +
-      vezbac.clanarina +
-      "</div>" +
-      '<div class="mt-3"><strong>Napomena:</strong><p class="text-muted mb-0">' +
-      napomenaTekst +
-      "</p></div>" +
+      '<div class="info-line"><strong>Godine:</strong> ' + v.godine + "</div>" +
+      '<div class="info-line"><strong>Pol:</strong> ' + v.pol + "</div>" +
+      '<div class="info-line"><strong>Cilj:</strong> ' + ikonicaZaCilj(v.cilj) + " " + v.cilj + "</div>" +
+      '<div class="info-line"><strong>Tip članarine:</strong> ' + v.clanarina + "</div>" +
+      '<div class="info-line"><strong>Zadnja uplata:</strong> ' + formatirajDatum(v.datumUplate) + "</div>" +
+      '<div class="info-line"><strong>Ističe:</strong> ' + formatirajDatum(v.istice) + "</div>" +
+      '<div class="info-line status-info ' + (v.status === "Istekla" ? "text-danger" : v.status === "Uskoro ističe" ? "text-warning-emphasis" : "text-success") + '"><strong>' + preostalaTekst + "</strong></div>" +
+      '<div class="mt-3"><strong>Napomena:</strong><p class="text-muted mb-0">' + napomenaTekst + "</p></div>" +
       "</div>" +
       "</div>" +
       "</div>";

@@ -38,19 +38,15 @@ body {
   border-top-right-radius: 20px;
 }
 
-.line-pothranjenost {
-  background: #0dcaf0;
-}
-
-.line-normalna {
+.line-aktivna {
   background: #198754;
 }
 
-.line-prekomerna {
+.line-uskoro {
   background: #ffc107;
 }
 
-.line-gojaznost {
+.line-istekla {
   background: #dc3545;
 }
 
@@ -62,4 +58,12 @@ body {
 
 .info-line {
   margin-bottom: 8px;
+}
+
+.status-info {
+  margin-top: 10px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.04);
+  font-size: 0.92rem;
 }
